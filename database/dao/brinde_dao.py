@@ -229,3 +229,5 @@ class BrindeDAO:
         params = (filial_id,) if filial_id else None
         rows = db.execute_query(query, params)
         return [dict(row) for row in rows]
+
+# Updated: 2025-10-14 14:28:20

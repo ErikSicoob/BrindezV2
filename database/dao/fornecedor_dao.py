@@ -101,3 +101,5 @@ class FornecedorDAO:
         termo_busca = f"%{termo}%"
         rows = db.execute_query(query, (termo_busca, termo_busca))
         return [dict(row) for row in rows]
+
+# Updated: 2025-10-14 14:28:20

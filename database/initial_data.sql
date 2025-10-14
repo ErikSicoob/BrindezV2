@@ -31,3 +31,5 @@ INSERT OR IGNORE INTO unidades_medida (codigo, nome, descricao, ativo) VALUES
 -- Inserir fornecedor padrão (se não existir)
 INSERT OR IGNORE INTO fornecedores (nome, contato, telefone, email, ativo) VALUES
 ('Fornecedor Padrão', 'Contato Geral', '(11) 9999-9999', 'contato@fornecedor.com', 1);
+
+-- Updated: 2025-10-14

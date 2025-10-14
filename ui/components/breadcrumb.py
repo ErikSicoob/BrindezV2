@@ -29,3 +29,5 @@ class Breadcrumb(ctk.CTkFrame):
     def set_path(self, path):
         """Define o caminho do breadcrumb"""
         self.label.configure(text=f"📍 {path}")
+
+# Updated: 2025-10-14 14:28:20

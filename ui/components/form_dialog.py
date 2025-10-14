@@ -328,3 +328,5 @@ class ConfirmDialog(ctk.CTkToplevel):
                     timer.start()
             except:
                 execute_callback()
+
+# Updated: 2025-10-14 14:28:20

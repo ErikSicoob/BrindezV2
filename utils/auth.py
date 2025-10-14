@@ -44,16 +44,41 @@ class AuthManager:
                 "active": user['ativo']
             }
         else:
-            # Se não encontrar, criar usuário admin temporário
-            self.current_user = {
-                "id": 1,
-                "name": "Administrador",
-                "username": windows_user,
-                "profile": "ADMIN",
-                "branch_id": 1,
-                "branch_name": "Matriz",
-                "active": True
-            }
+            # Se não encontrar, retornar None para usuário não autorizado
+            from database.connection import db
+            
+            try:
+                # Tenta obter a filial padrão (Matriz)
+                query = 'SELECT id, nome FROM filiais WHERE id = 1'
+                result = db.execute_query(query)
+                print(f"DEBUG: Resultado da consulta de filiais (id=1): {result}")
+                filial = result[0] if result else None
+                
+                if not filial:
+                    # Se não houver filial matriz, usa a primeira disponível
+                    query = 'SELECT id, nome FROM filiais LIMIT 1'
+                    result = db.execute_query(query)
+                    print(f"DEBUG: Resultado da consulta de filiais (LIMIT 1): {result}")
+                    filial = result[0] if result else None
+                
+                if filial:
+                    # Cria um usuário comum com perfil básico
+                    self.current_user = {
+                        "id": 0,  # ID 0 indica usuário não persistido
+                        "name": windows_user,
+                        "username": windows_user,
+                        "profile": "USUARIO",
+                        "branch_id": filial['id'],
+                        "branch_name": filial['nome'],
+                        "active": False  # Usuário inativo por padrão
+                    }
+                else:
+                    # Se não houver filiais cadastradas, não permite acesso
+                    return None
+                    
+            except Exception as e:
+                print(f"Erro ao verificar filiais: {e}")
+                return None
         
         return self.current_user
     
@@ -95,3 +120,5 @@ class AuthManager:
 
 # Instância global
 auth_manager = AuthManager()
+
+# Updated: 2025-10-14 14:28:20

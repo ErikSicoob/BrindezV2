@@ -110,6 +110,7 @@ class DatabaseConnection:
             cursor = self._connection.cursor()
             cursor.execute("SELECT COUNT(*) FROM filiais")
             filiais_count = cursor.fetchone()[0]
+            debug(f"Contagem de filiais no banco: {filiais_count}")
             
             if filiais_count == 0:
                 # Executar dados iniciais
@@ -120,12 +121,28 @@ class DatabaseConnection:
                     with open(initial_data_path, 'r', encoding='utf-8') as f:
                         initial_sql = f.read()
                     
-                    # Executar comandos individualmente
-                    commands = [cmd.strip() for cmd in initial_sql.split(';') if cmd.strip()]
+                    # Remover comentários e dividir comandos
+                    lines = initial_sql.split('\n')
+                    clean_lines = []
+                    for line in lines:
+                        # Remover comentários
+                        if '--' in line:
+                            line = line[:line.index('--')]
+                        line = line.strip()
+                        if line:
+                            clean_lines.append(line)
+                    
+                    clean_sql = ' '.join(clean_lines)
+                    commands = [cmd.strip() for cmd in clean_sql.split(';') if cmd.strip()]
                     
                     for command in commands:
-                        if command and not command.startswith('--'):
-                            cursor.execute(command)
+                        if command:
+                            try:
+                                cursor.execute(command)
+                                debug(f"Comando executado: {command[:50]}...")
+                            except Exception as cmd_error:
+                                warning(f"Erro ao executar comando: {cmd_error}")
+                                warning(f"Comando: {command[:100]}")
                     
                     self._connection.commit()
                     info("Dados iniciais inseridos")
@@ -229,3 +246,5 @@ class DatabaseConnection:
 
 # Instância global
 db = DatabaseConnection()
+
+# Updated: 2025-10-14 14:28:20

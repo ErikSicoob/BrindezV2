@@ -326,3 +326,5 @@ class ReportGenerator:
 
 # Instância global
 report_generator = ReportGenerator()
+
+# Updated: 2025-10-14 14:28:20

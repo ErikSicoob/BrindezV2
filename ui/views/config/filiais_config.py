@@ -97,17 +97,27 @@ class FiliaisConfig(ctk.CTkFrame):
     
     def _create_row(self, fil):
         """Cria linha de filial"""
-        row = ctk.CTkFrame(self.list_frame, fg_color="#f8f9fa", corner_radius=5)
+        # Destacar matriz com cor diferente
+        is_matriz = fil.get('is_matriz', 0) == 1
+        bg_color = "#e3f2fd" if is_matriz else "#f8f9fa"
+        
+        row = ctk.CTkFrame(self.list_frame, fg_color=bg_color, corner_radius=5)
         row.pack(fill="x", padx=10, pady=5)
         
         # Info
         info_frame = ctk.CTkFrame(row, fg_color="transparent")
         info_frame.pack(side="left", fill="x", expand=True, padx=15, pady=10)
         
+        # Nome com badge de matriz
+        name_text = f"{fil['numero']} - {fil['nome']}"
+        if is_matriz:
+            name_text += " 🏢 MATRIZ"
+        
         name_label = ctk.CTkLabel(
             info_frame,
-            text=f"{fil['numero']} - {fil['nome']}", 
-            font=("Segoe UI", 14, "bold")
+            text=name_text, 
+            font=("Segoe UI", 14, "bold"),
+            text_color=COLORS["primary"] if is_matriz else "#000000"
         )
         name_label.pack(anchor="w")
         
@@ -149,6 +159,14 @@ class FiliaisConfig(ctk.CTkFrame):
                                        fg_color=COLORS["success"],
                                        command=lambda: self.toggle_status(fil, True))
         status_btn.pack(side="left", padx=3)
+        
+        # Botão definir como matriz (apenas se não for matriz)
+        is_matriz = fil.get('is_matriz', 0) == 1
+        if not is_matriz:
+            matriz_btn = ctk.CTkButton(btn_frame, text="🏢 Definir Matriz", width=110,
+                                       fg_color=COLORS["primary"],
+                                       command=lambda: self.set_as_matriz(fil))
+            matriz_btn.pack(side="left", padx=3)
         
         # Botão excluir permanente
         delete_btn = ctk.CTkButton(btn_frame, text="🗑️ Excluir", width=90,
@@ -333,30 +351,37 @@ class FiliaisConfig(ctk.CTkFrame):
             confirm
         )
     
+    def set_as_matriz(self, fil):
+        """Define filial como matriz"""
+        def confirm():
+            try:
+                FilialDAO.set_matriz(fil["id"])
+                event_manager.emit(EVENTS['FILIAL_CHANGED'])
+                show_info("Sucesso", f"Filial '{fil['nome']}' definida como MATRIZ!")
+            except Exception as e:
+                show_error("Erro", f"Erro ao definir matriz: {str(e)}")
+        
+        ConfirmDialog(
+            self,
+            "Definir como Matriz",
+            f"Deseja definir '{fil['nome']}' como filial MATRIZ?\n\n" +
+            "A matriz atual será alterada.",
+            confirm
+        )
+    
     def delete_permanent(self, fil):
         """Exclui filial permanentemente"""
         def confirm():
             try:
-                # Verificar se há usuários ou brindes
-                from database.connection import db
+                # Usar método can_delete do DAO
+                can_delete, error_msg = FilialDAO.can_delete(fil["id"])
                 
-                check_users = "SELECT COUNT(*) as count FROM usuarios WHERE filial_id = ?"
-                result_users = db.execute_query(check_users, (fil["id"],))
-                
-                check_brindes = "SELECT COUNT(*) as count FROM brindes WHERE filial_id = ?"
-                result_brindes = db.execute_query(check_brindes, (fil["id"],))
-                
-                if result_users[0]['count'] > 0 or result_brindes[0]['count'] > 0:
-                    show_error(
-                        "Erro",
-                        f"Não é possível excluir!\n\n" +
-                        f"Usuários: {result_users[0]['count']}\n" +
-                        f"Brindes: {result_brindes[0]['count']}\n\n" +
-                        "Desative a filial ao invés de excluir."
-                    )
+                if not can_delete:
+                    show_error("Erro", error_msg)
                     return
                 
                 # Excluir permanentemente
+                from database.connection import db
                 delete_query = "DELETE FROM filiais WHERE id = ?"
                 db.execute_update(delete_query, (fil["id"],))
                 
@@ -375,3 +400,5 @@ class FiliaisConfig(ctk.CTkFrame):
             "Recomendamos usar 'Desativar' ao invés de excluir.",
             confirm
         )
+
+# Updated: 2025-10-14 14:28:20

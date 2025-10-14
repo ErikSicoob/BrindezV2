@@ -374,3 +374,5 @@ class ConfiguracoesView(ctk.CTkFrame):
         tab = self.tabview.tab("Filiais")
         config = FiliaisConfig(tab)
         config.pack(fill="both", expand=True, padx=20, pady=20)
+
+# Updated: 2025-10-14 14:28:20

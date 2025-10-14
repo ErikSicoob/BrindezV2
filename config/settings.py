@@ -55,3 +55,5 @@ DEFAULT_CATEGORIES = [
 
 # Configurações do Banco de Dados
 DB_PATH = "data/brindes.db"
+
+# Updated: 2025-10-14 14:28:20

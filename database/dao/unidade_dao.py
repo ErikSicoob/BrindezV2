@@ -65,3 +65,5 @@ class UnidadeDAO:
         query = "UPDATE unidades_medida SET ativo = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?"
         db.execute_update(query, (unidade_id,))
         return True
+
+# Updated: 2025-10-14 14:28:20

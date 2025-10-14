@@ -40,6 +40,12 @@ class App(ctk.CTk):
             # Autenticar usuário
             info("Autenticando usuário...")
             user = auth_manager.authenticate()
+            
+            if not user:
+                error("Falha na autenticação: Usuário não encontrado e não foi possível criar usuário temporário")
+                error("Verifique se existem filiais cadastradas no banco de dados")
+                raise Exception("Falha na autenticação do usuário")
+            
             info(f"Usuário autenticado: {user['name']} ({user['profile']}) - Filial: {user['branch_name']}")
             
             # Criar interface
@@ -50,6 +56,9 @@ class App(ctk.CTk):
             # Mostrar dashboard inicial
             info("Carregando Dashboard...")
             self.show_view("Dashboard")
+            
+            # Maximizar janela após tudo estar carregado
+            self.after(100, lambda: self.state('zoomed'))
             
             info("Sistema iniciado com sucesso!")
             
@@ -134,3 +143,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Updated: 2025-10-14 14:28:20

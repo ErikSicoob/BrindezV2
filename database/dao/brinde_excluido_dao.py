@@ -109,3 +109,5 @@ class BrindeExcluidoDAO:
         except Exception as e:
             logger.error(f"Erro ao contar brindes excluídos: {e}")
             return 0
+
+# Updated: 2025-10-14 14:28:20

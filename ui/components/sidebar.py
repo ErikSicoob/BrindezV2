@@ -131,3 +131,5 @@ class Sidebar(ctk.CTkFrame):
     def set_active_menu(self, menu_name):
         """Define menu ativo programaticamente (sem chamar callback)"""
         self._update_active_button(menu_name)
+
+# Updated: 2025-10-14 14:28:20

@@ -779,3 +779,5 @@ class BrindesView(ctk.CTkFrame):
             self.active_filters_label.configure(text=f"Filtros: {' | '.join(active)}")
         else:
             self.active_filters_label.configure(text="")
+
+# Updated: 2025-10-14 14:28:20

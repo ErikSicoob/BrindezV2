@@ -297,3 +297,5 @@ class UnidadesConfig(ctk.CTkFrame):
             "Recomendamos usar 'Desativar' ao invés de excluir.",
             confirm
         )
+
+# Updated: 2025-10-14 14:28:20

@@ -119,3 +119,5 @@ def critical(msg, *args, **kwargs):
 def exception(msg, *args, **kwargs):
     """Log de exceção (inclui traceback)"""
     logger.exception(msg, *args, **kwargs)
+
+# Updated: 2025-10-14 14:28:20

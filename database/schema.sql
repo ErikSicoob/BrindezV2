@@ -237,3 +237,5 @@ INNER JOIN filiais fo ON t.filial_origem_id = fo.id
 INNER JOIN filiais fd ON t.filial_destino_id = fd.id
 INNER JOIN usuarios u ON t.usuario_id = u.id
 ORDER BY t.data_transferencia DESC;
+
+-- Updated: 2025-10-14
