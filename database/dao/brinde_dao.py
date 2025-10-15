@@ -229,5 +229,77 @@ class BrindeDAO:
         params = (filial_id,) if filial_id else None
         rows = db.execute_query(query, params)
         return [dict(row) for row in rows]
+    
+    @staticmethod
+    def get_grouped_by_description():
+        """Retorna brindes agrupados por descrição (apenas com quantidade > 0)"""
+        query = """
+            SELECT 
+                b.descricao,
+                b.codigo_interno,
+                c.nome as categoria,
+                u.codigo as unidade,
+                fo.nome as fornecedor,
+                COUNT(DISTINCT CASE WHEN b.quantidade > 0 THEN b.filial_id END) as num_filiais,
+                SUM(CASE WHEN b.quantidade > 0 THEN b.quantidade ELSE 0 END) as quantidade_total,
+                AVG(CASE WHEN b.quantidade > 0 THEN b.valor_unitario END) as valor_medio,
+                SUM(CASE WHEN b.quantidade > 0 THEN b.quantidade * b.valor_unitario ELSE 0 END) as valor_total
+            FROM brindes b
+            LEFT JOIN categorias c ON b.categoria_id = c.id
+            LEFT JOIN unidades_medida u ON b.unidade_id = u.id
+            LEFT JOIN fornecedores fo ON b.fornecedor_id = fo.id
+            GROUP BY b.descricao, b.codigo_interno, c.nome, u.codigo, fo.nome
+            HAVING quantidade_total > 0
+            ORDER BY b.descricao
+        """
+        rows = db.execute_query(query)
+        return [dict(row) for row in rows]
+    
+    @staticmethod
+    def get_by_description(descricao):
+        """Retorna todos os registros de um brinde (por descrição) em todas as filiais"""
+        query = """
+            SELECT 
+                b.*,
+                c.nome as categoria,
+                u.codigo as unidade,
+                f.numero as filial_numero,
+                f.nome as filial,
+                fo.nome as fornecedor,
+                (b.quantidade * b.valor_unitario) as valor_total
+            FROM brindes b
+            LEFT JOIN categorias c ON b.categoria_id = c.id
+            LEFT JOIN unidades_medida u ON b.unidade_id = u.id
+            LEFT JOIN filiais f ON b.filial_id = f.id
+            LEFT JOIN fornecedores fo ON b.fornecedor_id = fo.id
+            WHERE b.descricao = ? AND b.quantidade > 0
+            ORDER BY f.numero
+        """
+        rows = db.execute_query(query, (descricao,))
+        return [dict(row) for row in rows]
+    
+    @staticmethod
+    def create_multi_filial(data, distribuicao):
+        """
+        Cria brinde em múltiplas filiais
+        
+        Args:
+            data: dict com dados do brinde (sem filial_id e quantidade)
+            distribuicao: dict {filial_id: quantidade}
+        
+        Returns:
+            list de IDs criados
+        """
+        ids_criados = []
+        
+        for filial_id, quantidade in distribuicao.items():
+            brinde_data = data.copy()
+            brinde_data['filial_id'] = filial_id
+            brinde_data['quantidade'] = quantidade
+            
+            brinde_id = BrindeDAO.create(brinde_data)
+            ids_criados.append(brinde_id)
+        
+        return ids_criados
 
-# Updated: 2025-10-14 14:28:20
+# Updated: 2025-10-15 14:17:00
