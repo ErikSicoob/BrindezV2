@@ -54,6 +54,16 @@ DEFAULT_CATEGORIES = [
 ]
 
 # Configurações do Banco de Dados
-DB_PATH = "data/brindes.db"
+def get_db_path():
+    """Obtém o caminho do banco de dados (configurado pelo usuário ou padrão)"""
+    try:
+        from config.user_settings import user_settings
+        user_path = user_settings.get_db_path()
+        return user_path if user_path else "data/brindes.db"
+    except:
+        return "data/brindes.db"
 
-# Updated: 2025-10-14 14:28:20
+# Caminho padrão do banco (pode ser sobrescrito pelo usuário)
+DB_PATH = get_db_path()
+
+# Updated: 2025-10-15 11:24:00

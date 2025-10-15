@@ -50,6 +50,7 @@ Thumbs.db
 
 # Local configuration
 local_settings.py
+config/user_config.json
 
 # Project specific
 __pycache__/

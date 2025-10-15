@@ -73,15 +73,42 @@ class ConfiguracoesView(ctk.CTkFrame):
         )
         db_label.pack(anchor="w", pady=(0, 5))
         
-        db_entry = ctk.CTkEntry(db_frame, height=35)
-        db_entry.insert(0, "data/brindes.db")
-        db_entry.pack(fill="x", pady=(0, 5))
+        # Frame para entry e botão de browse
+        entry_frame = ctk.CTkFrame(db_frame, fg_color="transparent")
+        entry_frame.pack(fill="x", pady=(0, 5))
+        
+        # Obter caminho atual do banco
+        from config.settings import DB_PATH
+        self.db_entry = ctk.CTkEntry(entry_frame, height=35)
+        self.db_entry.insert(0, DB_PATH)
+        self.db_entry.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        
+        browse_btn = ctk.CTkButton(
+            entry_frame,
+            text="📁 Procurar",
+            height=35,
+            width=100,
+            command=self._browse_database_path
+        )
+        browse_btn.pack(side="left")
+        
+        # Info sobre o caminho
+        info_label = ctk.CTkLabel(
+            db_frame,
+            text="💡 Use caminhos absolutos (ex: C:/MeusDados/brindes.db) ou relativos (ex: data/brindes.db)",
+            font=("Segoe UI", 9),
+            text_color="#666666",
+            wraplength=600,
+            justify="left"
+        )
+        info_label.pack(anchor="w", pady=(0, 5))
         
         db_button = ctk.CTkButton(
             db_frame,
-            text="Alterar Caminho",
+            text="💾 Salvar Caminho do Banco",
             height=35,
-            command=lambda: show_info("Em Desenvolvimento", "Função será implementada em breve!")
+            fg_color=COLORS["primary"],
+            command=self._save_database_path
         )
         db_button.pack(anchor="w")
         
@@ -100,17 +127,18 @@ class ConfiguracoesView(ctk.CTkFrame):
         )
         stock_label.pack(anchor="w", pady=(0, 5))
         
-        stock_entry = ctk.CTkEntry(stock_frame, height=35, width=150)
-        stock_entry.insert(0, "10")
-        stock_entry.pack(anchor="w")
+        from config.user_settings import user_settings
+        self.stock_entry = ctk.CTkEntry(stock_frame, height=35, width=150)
+        self.stock_entry.insert(0, str(user_settings.get_min_stock_alert()))
+        self.stock_entry.pack(anchor="w")
         
         save_button = ctk.CTkButton(
             card,
-            text="Salvar Configurações",
+            text="💾 Salvar Configurações Gerais",
             font=("Segoe UI", 14, "bold"),
             height=40,
             fg_color=COLORS["success"],
-            command=lambda: show_info("Sucesso", "Configurações salvas!")
+            command=self._save_general_settings
         )
         save_button.pack(padx=20, pady=(20, 20))
     
@@ -272,6 +300,95 @@ class ConfiguracoesView(ctk.CTkFrame):
         
         # Botão fechar
         dialog.add_buttons(lambda: dialog.safe_destroy())
+    
+    def _browse_database_path(self):
+        """Abre diálogo para selecionar caminho do banco de dados"""
+        from tkinter import filedialog
+        import os
+        
+        # Obter diretório atual do banco
+        current_path = self.db_entry.get()
+        initial_dir = os.path.dirname(current_path) if current_path else os.getcwd()
+        
+        # Abrir diálogo
+        filepath = filedialog.asksaveasfilename(
+            title="Selecionar localização do Banco de Dados",
+            initialdir=initial_dir,
+            initialfile="brindes.db",
+            defaultextension=".db",
+            filetypes=[("Banco SQLite", "*.db"), ("Todos os arquivos", "*.*")]
+        )
+        
+        if filepath:
+            self.db_entry.delete(0, "end")
+            self.db_entry.insert(0, filepath)
+    
+    def _save_database_path(self):
+        """Salva novo caminho do banco de dados"""
+        from ui.components.form_dialog import ConfirmDialog, show_info, show_error
+        import os
+        
+        new_path = self.db_entry.get().strip()
+        
+        if not new_path:
+            show_error("Erro", "Por favor, informe um caminho válido para o banco de dados!")
+            return
+        
+        def confirm_change():
+            try:
+                from config.user_settings import user_settings
+                
+                # Salvar configuração
+                if user_settings.set_db_path(new_path):
+                    show_info(
+                        "Sucesso",
+                        f"Caminho do banco de dados atualizado!\n\n{new_path}\n\n⚠️ IMPORTANTE: Você precisa reiniciar o sistema para que a alteração tenha efeito."
+                    )
+                else:
+                    show_error("Erro", "Falha ao salvar configuração!")
+            except Exception as e:
+                show_error("Erro", f"Erro ao salvar caminho do banco: {str(e)}")
+        
+        # Verificar se o caminho é diferente do atual
+        from config.settings import DB_PATH
+        if new_path == DB_PATH:
+            show_info("Info", "O caminho informado já é o caminho atual do banco de dados.")
+            return
+        
+        # Confirmar alteração
+        msg = f"Deseja alterar o caminho do banco de dados?\n\n"
+        msg += f"Caminho atual: {DB_PATH}\n"
+        msg += f"Novo caminho: {new_path}\n\n"
+        
+        if os.path.exists(new_path):
+            msg += "⚠️ O arquivo já existe e será utilizado.\n\n"
+        else:
+            msg += "⚠️ O arquivo será criado na primeira execução.\n\n"
+        
+        msg += "O sistema precisará ser reiniciado após a alteração."
+        
+        ConfirmDialog(self, "⚙️ Confirmar Alteração", msg, confirm_change)
+    
+    def _save_general_settings(self):
+        """Salva configurações gerais"""
+        from ui.components.form_dialog import show_info, show_error
+        
+        try:
+            from config.user_settings import user_settings
+            
+            # Salvar quantidade mínima de estoque
+            try:
+                min_stock = int(self.stock_entry.get())
+                if min_stock < 0:
+                    raise ValueError("Quantidade deve ser positiva")
+                user_settings.set_min_stock_alert(min_stock)
+            except ValueError:
+                show_error("Erro", "Por favor, informe um número válido para a quantidade mínima!")
+                return
+            
+            show_info("Sucesso", "Configurações salvas com sucesso!")
+        except Exception as e:
+            show_error("Erro", f"Erro ao salvar configurações: {str(e)}")
     
     def _restore_backup(self, backup_path, dialog):
         """Restaura um backup específico"""
