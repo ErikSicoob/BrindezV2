@@ -48,14 +48,22 @@ class ContextMenu(ctk.CTkToplevel):
                 )
                 btn.pack(fill="x", padx=2, pady=1)
         
-        # Fechar ao clicar fora
-        self.bind("<FocusOut>", lambda e: self.destroy())
+        # Fechar ao clicar fora - com delay para evitar fechamento imediato
+        self.bind("<FocusOut>", lambda e: self.after(100, self._check_focus))
         self.focus_force()
         
         # Ajustar largura mínima
         self.update_idletasks()
         width = max(180, self.winfo_reqwidth())
         self.geometry(f"{width}x{self.winfo_reqheight()}")
+    
+    def _check_focus(self):
+        """Verifica se o menu ainda existe antes de destruir"""
+        try:
+            if self.winfo_exists() and not self.focus_displayof():
+                self.destroy()
+        except:
+            pass
     
     def _execute_and_close(self, command):
         """Executa comando e fecha o menu"""

@@ -174,8 +174,11 @@ class BrindesView(ctk.CTkFrame):
             logger.debug(f"View destruída durante load_brindes_grouped: {e}")
             return
         
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
+        
         # Buscar brindes agrupados
-        brindes_grouped = BrindeDAO.get_grouped_by_description()
+        brindes_grouped = BrindeDAO.get_grouped_by_description(branch_id)
         
         # Aplicar filtros no agrupamento
         brindes_grouped = self._apply_filters_grouped(brindes_grouped)
@@ -193,7 +196,7 @@ class BrindesView(ctk.CTkFrame):
         # Criar cards expandíveis
         for brinde_group in brindes_grouped:
             # Buscar detalhes por filial
-            detalhes = BrindeDAO.get_by_description(brinde_group['descricao'])
+            detalhes = BrindeDAO.get_by_description(brinde_group['descricao'], branch_id)
             
             # Aplicar filtros nos detalhes
             detalhes = self._apply_filters(detalhes)

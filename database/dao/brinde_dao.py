@@ -231,7 +231,7 @@ class BrindeDAO:
         return [dict(row) for row in rows]
     
     @staticmethod
-    def get_grouped_by_description():
+    def get_grouped_by_description(filial_id=None):
         """Retorna brindes agrupados por descrição (apenas com quantidade > 0)"""
         query = """
             SELECT 
@@ -248,15 +248,24 @@ class BrindeDAO:
             LEFT JOIN categorias c ON b.categoria_id = c.id
             LEFT JOIN unidades_medida u ON b.unidade_id = u.id
             LEFT JOIN fornecedores fo ON b.fornecedor_id = fo.id
+        """
+        
+        params = []
+        if filial_id:
+            query += " WHERE b.filial_id = ?"
+            params.append(filial_id)
+        
+        query += """
             GROUP BY b.descricao, b.codigo_interno, c.nome, u.codigo, fo.nome
             HAVING quantidade_total > 0
             ORDER BY b.descricao
         """
-        rows = db.execute_query(query)
+        
+        rows = db.execute_query(query, tuple(params) if params else None)
         return [dict(row) for row in rows]
     
     @staticmethod
-    def get_by_description(descricao):
+    def get_by_description(descricao, filial_id=None):
         """Retorna todos os registros de um brinde (por descrição) em todas as filiais"""
         query = """
             SELECT 
@@ -273,9 +282,16 @@ class BrindeDAO:
             LEFT JOIN filiais f ON b.filial_id = f.id
             LEFT JOIN fornecedores fo ON b.fornecedor_id = fo.id
             WHERE b.descricao = ? AND b.quantidade > 0
-            ORDER BY f.numero
         """
-        rows = db.execute_query(query, (descricao,))
+        
+        params = [descricao]
+        if filial_id:
+            query += " AND b.filial_id = ?"
+            params.append(filial_id)
+        
+        query += " ORDER BY f.numero"
+        
+        rows = db.execute_query(query, tuple(params))
         return [dict(row) for row in rows]
     
     @staticmethod

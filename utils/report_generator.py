@@ -95,7 +95,7 @@ class ReportGenerator:
             return []
     
     @staticmethod
-    def get_transferencias(data_inicio=None, data_fim=None):
+    def get_transferencias(data_inicio=None, data_fim=None, filial_id=None):
         """Relatório de transferências"""
         try:
             query = """
@@ -124,6 +124,11 @@ class ReportGenerator:
             if data_fim:
                 query += " AND DATE(t.data_transferencia) <= ?"
                 params.append(data_fim)
+            
+            if filial_id:
+                query += " AND (t.filial_origem_id = ? OR t.filial_destino_id = ?)"
+                params.append(filial_id)
+                params.append(filial_id)
             
             query += " ORDER BY t.data_transferencia DESC"
             

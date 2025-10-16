@@ -192,53 +192,60 @@ class ExpandableCard(ctk.CTkFrame):
     def _bind_context_menu(self, widget, item):
         """Vincula menu de contexto ao widget"""
         def show_menu(event):
-            menu_items = []
+            # Prevenir propagação do evento
+            try:
+                menu_items = []
+                
+                # Editar
+                if self.on_edit:
+                    menu_items.append({
+                        'label': '✏️ Editar',
+                        'command': lambda i=item: self.on_edit(i)
+                    })
+                
+                # Entrada
+                if self.on_add_stock:
+                    menu_items.append({
+                        'label': '📥 Entrada de Estoque',
+                        'command': lambda i=item: self.on_add_stock(i),
+                        'color': COLORS["success"]
+                    })
+                
+                # Saída
+                if self.on_remove_stock:
+                    menu_items.append({
+                        'label': '📤 Saída de Estoque',
+                        'command': lambda i=item: self.on_remove_stock(i),
+                        'color': COLORS["warning"]
+                    })
+                
+                # Transferir
+                if self.on_transfer:
+                    menu_items.append({
+                        'label': '🔄 Transferir para Filial',
+                        'command': lambda i=item: self.on_transfer(i),
+                        'color': COLORS["info"]
+                    })
+                
+                # Separador
+                if menu_items and self.on_delete:
+                    menu_items.append({'separator': True})
+                
+                # Excluir
+                if self.on_delete:
+                    menu_items.append({
+                        'label': '🗑️ Excluir',
+                        'command': lambda i=item: self.on_delete(i),
+                        'color': COLORS["danger"]
+                    })
+                
+                if menu_items:
+                    show_context_menu(widget, event, menu_items)
+            except Exception as e:
+                from utils.logger import logger
+                logger.error(f"Erro ao mostrar menu de contexto: {e}")
             
-            # Editar
-            if self.on_edit:
-                menu_items.append({
-                    'label': '✏️ Editar',
-                    'command': lambda: self.on_edit(item)
-                })
-            
-            # Entrada
-            if self.on_add_stock:
-                menu_items.append({
-                    'label': '📥 Entrada de Estoque',
-                    'command': lambda: self.on_add_stock(item),
-                    'color': COLORS["success"]
-                })
-            
-            # Saída
-            if self.on_remove_stock:
-                menu_items.append({
-                    'label': '📤 Saída de Estoque',
-                    'command': lambda: self.on_remove_stock(item),
-                    'color': COLORS["warning"]
-                })
-            
-            # Transferir
-            if self.on_transfer:
-                menu_items.append({
-                    'label': '🔄 Transferir para Filial',
-                    'command': lambda: self.on_transfer(item),
-                    'color': COLORS["info"]
-                })
-            
-            # Separador
-            if menu_items and self.on_delete:
-                menu_items.append({'separator': True})
-            
-            # Excluir
-            if self.on_delete:
-                menu_items.append({
-                    'label': '🗑️ Excluir',
-                    'command': lambda: self.on_delete(item),
-                    'color': COLORS["danger"]
-                })
-            
-            if menu_items:
-                show_context_menu(widget, event, menu_items)
+            return "break"  # Prevenir propagação
         
         widget.bind("<Button-3>", show_menu)
         

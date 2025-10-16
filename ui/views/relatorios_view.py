@@ -170,6 +170,16 @@ class RelatoriosView(ctk.CTkFrame):
         )
         refresh_btn.pack(side="right")
         
+        # Botão exportar XLSX
+        xlsx_btn = ctk.CTkButton(
+            filter_frame,
+            text="📊 Exportar XLSX",
+            width=150,
+            fg_color=COLORS["success"],
+            command=lambda: self.export_report(BrindeExcluidoDAO.get_all(limit=50), "brindes_excluidos", "excel")
+        )
+        xlsx_btn.pack(side="right", padx=5)
+        
         # Frame para lista
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True)
@@ -238,15 +248,19 @@ class RelatoriosView(ctk.CTkFrame):
     
     def show_estoque_atual(self):
         """Relatório de estoque atual"""
+        from utils.auth import auth_manager
         
         dialog = FormDialog(self, "📦 Relatório de Estoque Atual", width=1200, height=600)
+        
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
         
         # Botões de exportação
         export_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
         export_frame.pack(fill="x", pady=(0, 10))
         
         # Buscar dados
-        dados = report_generator.get_estoque_atual()
+        dados = report_generator.get_estoque_atual(branch_id)
         
         excel_btn = ctk.CTkButton(
             export_frame,
@@ -291,10 +305,14 @@ class RelatoriosView(ctk.CTkFrame):
         """Relatório de movimentações"""
         from ui.components.form_dialog import FormDialog
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
         import customtkinter as ctk
         from datetime import datetime, timedelta
         
         dialog = FormDialog(self, "🔄 Relatório de Movimentações", width=1200, height=600)
+        
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
         
         # Filtros de data
         filter_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
@@ -321,6 +339,12 @@ class RelatoriosView(ctk.CTkFrame):
                                    command=lambda: self._load_movimentacoes(list_frame, start_entry.get(), end_entry.get()))
         filter_btn.pack(side="left", padx=10)
         
+        # Botão exportar XLSX
+        xlsx_btn = ctk.CTkButton(filter_frame, text="📊 Exportar XLSX", width=150,
+                                 fg_color=COLORS["success"],
+                                 command=lambda: self.export_report(report_generator.get_movimentacoes(start_entry.get(), end_entry.get(), branch_id), "movimentacoes", "excel"))
+        xlsx_btn.pack(side="left", padx=10)
+        
         # Frame para lista
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True, pady=10)
@@ -333,12 +357,16 @@ class RelatoriosView(ctk.CTkFrame):
     def _load_movimentacoes(self, list_frame, data_inicio, data_fim):
         """Carrega movimentações"""
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
+        
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
         
         # Limpar lista
         for widget in list_frame.winfo_children():
             widget.destroy()
         
-        dados = report_generator.get_movimentacoes(data_inicio, data_fim)
+        dados = report_generator.get_movimentacoes(data_inicio, data_fim, branch_id)
         
         if not dados:
             no_data = ctk.CTkLabel(list_frame, text="Nenhuma movimentação encontrada", font=("Segoe UI", 14), text_color="#999999")
@@ -359,14 +387,27 @@ class RelatoriosView(ctk.CTkFrame):
         """Relatório de estoque baixo"""
         from ui.components.form_dialog import FormDialog
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
         import customtkinter as ctk
         
         dialog = FormDialog(self, "⚠️ Relatório de Estoque Baixo", width=1000, height=600)
         
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
+        
+        # Botão exportar XLSX
+        export_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
+        export_frame.pack(fill="x", pady=(0, 10))
+        
+        xlsx_btn = ctk.CTkButton(export_frame, text="📊 Exportar XLSX", width=150,
+                                 fg_color=COLORS["success"],
+                                 command=lambda: self.export_report(report_generator.get_estoque_baixo(branch_id), "estoque_baixo", "excel"))
+        xlsx_btn.pack(side="left", padx=5)
+        
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True, pady=10)
         
-        dados = report_generator.get_estoque_baixo()
+        dados = report_generator.get_estoque_baixo(branch_id)
         
         if not dados:
             no_data = ctk.CTkLabel(list_frame, text="✅ Nenhum item com estoque baixo!", font=("Segoe UI", 14), text_color=COLORS["success"])
@@ -388,14 +429,27 @@ class RelatoriosView(ctk.CTkFrame):
         """Relatório de valor por categoria"""
         from ui.components.form_dialog import FormDialog
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
         import customtkinter as ctk
         
         dialog = FormDialog(self, "💰 Relatório de Valor por Categoria", width=1000, height=600)
         
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
+        
+        # Botão exportar XLSX
+        export_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
+        export_frame.pack(fill="x", pady=(0, 10))
+        
+        xlsx_btn = ctk.CTkButton(export_frame, text="📊 Exportar XLSX", width=150,
+                                 fg_color=COLORS["success"],
+                                 command=lambda: self.export_report(report_generator.get_valor_por_categoria(branch_id), "valor_categoria", "excel"))
+        xlsx_btn.pack(side="left", padx=5)
+        
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True, pady=10)
         
-        dados = report_generator.get_valor_por_categoria()
+        dados = report_generator.get_valor_por_categoria(branch_id)
         
         if not dados:
             no_data = ctk.CTkLabel(list_frame, text="Nenhum dado encontrado", font=("Segoe UI", 14), text_color="#999999")
@@ -419,6 +473,15 @@ class RelatoriosView(ctk.CTkFrame):
         import customtkinter as ctk
         
         dialog = FormDialog(self, "👥 Relatório de Usuários", width=1200, height=600)
+        
+        # Botão exportar XLSX
+        export_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
+        export_frame.pack(fill="x", pady=(0, 10))
+        
+        xlsx_btn = ctk.CTkButton(export_frame, text="📊 Exportar XLSX", width=150,
+                                 fg_color=COLORS["success"],
+                                 command=lambda: self.export_report(report_generator.get_usuarios_report(), "usuarios", "excel"))
+        xlsx_btn.pack(side="left", padx=5)
         
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True, pady=10)
@@ -445,10 +508,14 @@ class RelatoriosView(ctk.CTkFrame):
         """Relatório de transferências"""
         from ui.components.form_dialog import FormDialog
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
         import customtkinter as ctk
         from datetime import datetime, timedelta
         
         dialog = FormDialog(self, "➡️ Relatório de Transferências", width=1200, height=600)
+        
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
         
         # Filtros de data
         filter_frame = ctk.CTkFrame(dialog.content_frame, fg_color="transparent")
@@ -472,6 +539,12 @@ class RelatoriosView(ctk.CTkFrame):
                                    command=lambda: self._load_transferencias(list_frame, start_entry.get(), end_entry.get()))
         filter_btn.pack(side="left", padx=10)
         
+        # Botão exportar XLSX
+        xlsx_btn = ctk.CTkButton(filter_frame, text="📊 Exportar XLSX", width=150,
+                                 fg_color=COLORS["success"],
+                                 command=lambda: self.export_report(report_generator.get_transferencias(start_entry.get(), end_entry.get(), branch_id), "transferencias", "excel"))
+        xlsx_btn.pack(side="left", padx=10)
+        
         list_frame = ctk.CTkScrollableFrame(dialog.content_frame, fg_color="white", corner_radius=5)
         list_frame.pack(fill="both", expand=True, pady=10)
         
@@ -482,11 +555,15 @@ class RelatoriosView(ctk.CTkFrame):
     def _load_transferencias(self, list_frame, data_inicio, data_fim):
         """Carrega transferências"""
         from utils.report_generator import report_generator
+        from utils.auth import auth_manager
+        
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
         
         for widget in list_frame.winfo_children():
             widget.destroy()
         
-        dados = report_generator.get_transferencias(data_inicio, data_fim)
+        dados = report_generator.get_transferencias(data_inicio, data_fim, branch_id)
         
         if not dados:
             no_data = ctk.CTkLabel(list_frame, text="Nenhuma transferência encontrada", font=("Segoe UI", 14), text_color="#999999")
@@ -506,13 +583,17 @@ class RelatoriosView(ctk.CTkFrame):
         """Relatório de histórico de item"""
         from ui.components.form_dialog import FormDialog, show_error
         from database.dao import BrindeDAO
+        from utils.auth import auth_manager
         import customtkinter as ctk
         
         # Dialog para selecionar item
         dialog = FormDialog(self, "📜 Histórico de Item - Selecionar", width=600, height=400)
         
+        # Determinar filial baseado nas permissões
+        branch_id = None if auth_manager.can_view_all_branches() else auth_manager.get_user_branch()
+        
         # Buscar brindes
-        brindes = BrindeDAO.get_all()
+        brindes = BrindeDAO.get_all(branch_id)
         if not brindes:
             show_error("Erro", "Nenhum brinde cadastrado!")
             dialog.safe_destroy()
