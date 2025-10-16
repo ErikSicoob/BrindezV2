@@ -14,7 +14,7 @@ class ExpandableCard(ctk.CTkFrame):
     def __init__(self, master, title, data, on_edit=None, on_add_stock=None, on_remove_stock=None, on_transfer=None, on_delete=None, **kwargs):
         super().__init__(master, **kwargs)
         
-        self.configure(fg_color="white", corner_radius=5)
+        self.configure(fg_color=COLORS["card_bg"], corner_radius=8)
         self.data = data
         self.on_edit = on_edit
         self.on_add_stock = on_add_stock
@@ -53,7 +53,7 @@ class ExpandableCard(ctk.CTkFrame):
             info_frame,
             text=title,
             font=("Segoe UI", 13, "bold"),
-            text_color=COLORS["dark"],
+            text_color=COLORS["card_text"],
             anchor="w"
         )
         title_label.pack(side="left", padx=(0, 20))
@@ -84,7 +84,7 @@ class ExpandableCard(ctk.CTkFrame):
     
     def _create_details_frame(self):
         """Cria frame de detalhes (inicialmente oculto)"""
-        self.details_frame = ctk.CTkFrame(self, fg_color="#f8f9fa", corner_radius=5)
+        self.details_frame = ctk.CTkFrame(self, fg_color=COLORS["light"], corner_radius=5)
         
         if not self.data:
             no_data_label = ctk.CTkLabel(
@@ -97,7 +97,7 @@ class ExpandableCard(ctk.CTkFrame):
             return
         
         # Cabeçalho da tabela
-        header = ctk.CTkFrame(self.details_frame, fg_color=COLORS["info"], corner_radius=0)
+        header = ctk.CTkFrame(self.details_frame, fg_color=COLORS["primary"], corner_radius=0)
         header.pack(fill="x", pady=(10, 0), padx=10)
         
         headers = ["Filial", "Quantidade", "Valor Unit.", "Valor Total", "Categoria", "Fornecedor"]
@@ -106,7 +106,7 @@ class ExpandableCard(ctk.CTkFrame):
                 header,
                 text=text,
                 font=("Segoe UI", 10, "bold"),
-                text_color="white"
+                text_color=COLORS["white"]
             )
             label.grid(row=0, column=i, padx=8, pady=8, sticky="w")
         
@@ -117,7 +117,7 @@ class ExpandableCard(ctk.CTkFrame):
         for idx, item in enumerate(self.data):
             row_frame = ctk.CTkFrame(
                 data_frame,
-                fg_color="white" if idx % 2 == 0 else "#f0f0f0",
+                fg_color=COLORS["card_bg"] if idx % 2 == 0 else COLORS["hover"],
                 corner_radius=3
             )
             row_frame.pack(fill="x", pady=2)

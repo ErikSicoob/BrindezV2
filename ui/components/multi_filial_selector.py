@@ -60,9 +60,11 @@ class MultiFilialSelector(ctk.CTkFrame):
         # Frame para múltiplas filiais com scroll bloqueado
         self.multi_frame = ctk.CTkScrollableFrame(
             self,
-            fg_color="#f8f9fa",
+            fg_color=COLORS["light"],
             corner_radius=8,
-            height=250
+            height=250,
+            scrollbar_button_color=COLORS["primary"],
+            scrollbar_button_hover_color=COLORS["primary_light"]
         )
         
         # Bloquear propagação de eventos de scroll
@@ -128,14 +130,14 @@ class MultiFilialSelector(ctk.CTkFrame):
         info_label.pack(anchor="w", padx=10, pady=(10, 15))
         
         # Cabeçalho
-        header_frame = ctk.CTkFrame(self.multi_frame, fg_color=COLORS["info"], corner_radius=5)
+        header_frame = ctk.CTkFrame(self.multi_frame, fg_color=COLORS["primary"], corner_radius=5)
         header_frame.pack(fill="x", padx=10, pady=(0, 10))
         
         filial_header = ctk.CTkLabel(
             header_frame,
             text="Filial",
             font=("Segoe UI", 11, "bold"),
-            text_color="white",
+            text_color=COLORS["white"],
             width=300,
             anchor="w"
         )
@@ -145,7 +147,7 @@ class MultiFilialSelector(ctk.CTkFrame):
             header_frame,
             text="Quantidade",
             font=("Segoe UI", 11, "bold"),
-            text_color="white",
+            text_color=COLORS["white"],
             width=150,
             anchor="w"
         )
@@ -154,7 +156,7 @@ class MultiFilialSelector(ctk.CTkFrame):
         # Lista de filiais
         self.filial_entries = {}
         for filial in self.filiais:
-            row_frame = ctk.CTkFrame(self.multi_frame, fg_color="white", corner_radius=3)
+            row_frame = ctk.CTkFrame(self.multi_frame, fg_color=COLORS["card_bg"], corner_radius=3)
             row_frame.pack(fill="x", padx=10, pady=5)
             
             # Nome da filial
@@ -194,7 +196,7 @@ class MultiFilialSelector(ctk.CTkFrame):
             self.filial_entries[filial['id']] = qty_entry
         
         # Label de total
-        total_frame = ctk.CTkFrame(self.multi_frame, fg_color="#e3f2fd", corner_radius=5)
+        total_frame = ctk.CTkFrame(self.multi_frame, fg_color=COLORS["hover"], corner_radius=5)
         total_frame.pack(fill="x", padx=10, pady=(15, 10))
         
         self.total_label = ctk.CTkLabel(

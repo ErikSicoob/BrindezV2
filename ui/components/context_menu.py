@@ -21,7 +21,7 @@ class ContextMenu(ctk.CTkToplevel):
         
         # Configurar janela
         self.overrideredirect(True)  # Remover decorações
-        self.configure(fg_color="white", border_width=1, border_color="#cccccc")
+        self.configure(fg_color=COLORS["card_bg"], border_width=1, border_color=COLORS["border"])
         
         # Posicionar
         self.geometry(f"+{x}+{y}")
@@ -30,7 +30,7 @@ class ContextMenu(ctk.CTkToplevel):
         for item in items:
             if item.get('separator'):
                 # Separador
-                sep = ctk.CTkFrame(self, height=1, fg_color="#e0e0e0")
+                sep = ctk.CTkFrame(self, height=1, fg_color=COLORS["border"])
                 sep.pack(fill="x", padx=5, pady=3)
             else:
                 # Item do menu
@@ -38,8 +38,8 @@ class ContextMenu(ctk.CTkToplevel):
                     self,
                     text=item['label'],
                     fg_color="transparent",
-                    hover_color="#f0f0f0",
-                    text_color=item.get('color', COLORS["dark"]),
+                    hover_color=COLORS["hover"],
+                    text_color=item.get('color', COLORS["card_text"]),
                     anchor="w",
                     height=32,
                     corner_radius=0,

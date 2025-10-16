@@ -14,7 +14,7 @@ class Breadcrumb(ctk.CTkFrame):
         
         self.configure(
             height=50,
-            fg_color="white",
+            fg_color=COLORS["card_bg"],
             corner_radius=0
         )
         
@@ -22,7 +22,7 @@ class Breadcrumb(ctk.CTkFrame):
             self,
             text="",
             font=("Segoe UI", 16, "bold"),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         self.label.pack(side="left", padx=20, pady=10)
     

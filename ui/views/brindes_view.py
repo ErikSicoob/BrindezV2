@@ -83,7 +83,7 @@ class BrindesView(ctk.CTkFrame):
             width=120,
             corner_radius=8,
             fg_color=COLORS["secondary"],
-            hover_color="#5a6268",
+            hover_color=COLORS["secondary_dark"],
             command=self.show_filters_dialog
         )
         filter_button.pack(side="left", padx=5)
@@ -96,8 +96,8 @@ class BrindesView(ctk.CTkFrame):
             height=40,
             width=100,
             corner_radius=8,
-            fg_color="#dc3545",
-            hover_color="#c82333",
+            fg_color=COLORS["danger"],
+            hover_color=COLORS["accent_purple_hover"],
             command=self.clear_filters
         )
         clear_button.pack(side="left", padx=5)
@@ -112,7 +112,7 @@ class BrindesView(ctk.CTkFrame):
         self.active_filters_label.pack(side="left", padx=10)
         
         # Container de lista
-        list_container = ctk.CTkFrame(main_container, fg_color="white", corner_radius=10)
+        list_container = ctk.CTkFrame(main_container, fg_color=COLORS["card_bg"], corner_radius=10)
         list_container.pack(fill="both", expand=True)
         
         # Cabeçalho removido - visualização agrupada não precisa
@@ -252,8 +252,19 @@ class BrindesView(ctk.CTkFrame):
         # Buscar dados FRESCOS do banco
         categorias = CategoriaDAO.get_all()
         unidades = UnidadeDAO.get_all()
-        filiais = FilialDAO.get_all()
         fornecedores = FornecedorDAO.get_all()
+        
+        # Controle de permissões por filial
+        user_branch_id = auth_manager.get_user_branch()
+        is_matriz = auth_manager.can_view_all_branches()
+        
+        # Se for matriz, pode cadastrar para todas as filiais
+        # Se for filial, só pode cadastrar para sua própria filial
+        if is_matriz:
+            filiais = FilialDAO.get_all()
+        else:
+            # Buscar apenas a filial do usuário
+            filiais = [f for f in FilialDAO.get_all() if f['id'] == user_branch_id]
         
         # Validar se há dados necessários
         if not categorias:
@@ -308,7 +319,18 @@ class BrindesView(ctk.CTkFrame):
             text="Distribuição por Filiais",
             font=("Segoe UI", 12, "bold")
         )
-        filial_label.pack(anchor="w", padx=20, pady=(5, 10))
+        filial_label.pack(anchor="w", padx=20, pady=(5, 5))
+        
+        # Mensagem informativa sobre permissões
+        if not is_matriz:
+            info_permissao = ctk.CTkLabel(
+                dialog.content_frame,
+                text=f"ℹ️ Você só pode cadastrar brindes para sua filial: {filiais[0]['nome']}",
+                font=("Segoe UI", 10),
+                text_color=COLORS["info"],
+                wraplength=600
+            )
+            info_permissao.pack(anchor="w", padx=20, pady=(0, 10))
         
         multi_filial_selector = MultiFilialSelector(
             dialog.content_frame,
@@ -514,13 +536,18 @@ class BrindesView(ctk.CTkFrame):
         qtd_entry = dialog.add_field("Quantidade a Transferir *")
         qtd_entry.insert(0, "0")
         
-        # Observações
-        obs_text = dialog.add_field("Observações", "textbox")
+        # Justificativa obrigatória
+        just_text = dialog.add_field("Justificativa *", "textbox")
         
         def save():
             try:
                 qtd = int(qtd_entry.get())
-                obs = obs_text.get("1.0", "end-1c")
+                just = just_text.get("1.0", "end-1c").strip()
+                
+                # Validar justificativa obrigatória
+                if not just:
+                    show_error("Erro", "Justificativa é obrigatória!")
+                    return
                 
                 if qtd <= 0:
                     show_error("Erro", "Quantidade deve ser maior que zero!")
@@ -547,7 +574,7 @@ class BrindesView(ctk.CTkFrame):
                             filial_destino["id"],
                             qtd,
                             auth_manager.current_user["id"],
-                            obs
+                            just
                         )
                         
                         event_manager.emit(EVENTS['STOCK_CHANGED'])
@@ -576,18 +603,27 @@ class BrindesView(ctk.CTkFrame):
     
     def add_stock(self, brinde):
         """Adiciona estoque"""
-        dialog = FormDialog(self, f"Entrada: {brinde['descricao']}", width=500, height=350)
+        dialog = FormDialog(self, f"Entrada: {brinde['descricao']}", width=500, height=400)
         
         qtd_entry = dialog.add_field("Quantidade *")
         valor_entry = dialog.add_field("Valor Unitário")
         valor_entry.insert(0, str(brinde["valor_unitario"]))
-        just_text = dialog.add_field("Justificativa", "textbox")
+        just_text = dialog.add_field("Justificativa *", "textbox")
         
         def save():
             try:
                 qtd = int(qtd_entry.get())
                 valor = float(valor_entry.get())
-                just = just_text.get("1.0", "end-1c")
+                just = just_text.get("1.0", "end-1c").strip()
+                
+                # Validar justificativa obrigatória
+                if not just:
+                    show_error("Erro", "Justificativa é obrigatória!")
+                    return
+                
+                if qtd <= 0:
+                    show_error("Erro", "Quantidade deve ser maior que zero!")
+                    return
                 
                 BrindeDAO.add_stock(brinde["id"], qtd, valor)
                 MovimentacaoDAO.create_entrada(brinde["id"], qtd, valor, auth_manager.current_user["id"], just)

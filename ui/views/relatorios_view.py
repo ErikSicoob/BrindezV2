@@ -25,8 +25,13 @@ class RelatoriosView(ctk.CTkFrame):
     
     def _create_widgets(self):
         """Cria os widgets da tela"""
-        # Container principal
-        main_container = ctk.CTkFrame(self, fg_color="transparent")
+        # Container principal com scroll
+        main_container = ctk.CTkScrollableFrame(
+            self, 
+            fg_color="transparent",
+            scrollbar_button_color=COLORS["primary"],
+            scrollbar_button_hover_color=COLORS["primary_light"]
+        )
         main_container.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Título
@@ -34,7 +39,7 @@ class RelatoriosView(ctk.CTkFrame):
             main_container,
             text="📈 Relatórios Disponíveis",
             font=("Segoe UI", 24, "bold"),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         title.pack(pady=(0, 30))
         
@@ -59,18 +64,19 @@ class RelatoriosView(ctk.CTkFrame):
             font=("Segoe UI", 14, "bold"),
             height=40,
             width=200,
-            fg_color=COLORS["info"],
+            fg_color=COLORS["primary"],
+            hover_color=COLORS["primary_light"],
             command=self.download_templates
         )
         template_btn.pack(side="left", padx=5)
         
-        # Grid de relatórios
-        reports_grid = ctk.CTkFrame(main_container, fg_color="transparent")
-        reports_grid.pack(fill="both", expand=True)
+        # Grid de relatórios - usar pack ao invés de grid para melhor responsividade
+        reports_container = ctk.CTkFrame(main_container, fg_color="transparent")
+        reports_container.pack(fill="x", pady=(0, 20))
         
-        # Configurar grid
-        reports_grid.grid_columnconfigure(0, weight=1)
-        reports_grid.grid_columnconfigure(1, weight=1)
+        # Configurar grid com 2 colunas
+        reports_container.grid_columnconfigure(0, weight=1)
+        reports_container.grid_columnconfigure(1, weight=1)
         
         # Relatórios
         reports = [
@@ -85,16 +91,16 @@ class RelatoriosView(ctk.CTkFrame):
         ]
         
         for title, desc, row, col in reports:
-            self._create_report_card(reports_grid, title, desc, row, col)
+            self._create_report_card(reports_container, title, desc, row, col)
     
     def _create_report_card(self, parent, title, description, row, col):
         """Cria um card de relatório"""
-        card = ctk.CTkFrame(parent, fg_color="white", corner_radius=10)
+        card = ctk.CTkFrame(parent, fg_color=COLORS["card_bg"], corner_radius=10)
         card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         
         # Configurar hover
-        card.bind("<Enter>", lambda e: card.configure(fg_color="#f0f0f0"))
-        card.bind("<Leave>", lambda e: card.configure(fg_color="white"))
+        card.bind("<Enter>", lambda e: card.configure(fg_color=COLORS["hover"]))
+        card.bind("<Leave>", lambda e: card.configure(fg_color=COLORS["card_bg"]))
         card.bind("<Button-1>", lambda e: self.generate_report(title))
         
         # Título
@@ -102,7 +108,7 @@ class RelatoriosView(ctk.CTkFrame):
             card,
             text=title,
             font=("Segoe UI", 16, "bold"),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         title_label.pack(padx=20, pady=(20, 10), anchor="w")
         title_label.bind("<Button-1>", lambda e: self.generate_report(title))

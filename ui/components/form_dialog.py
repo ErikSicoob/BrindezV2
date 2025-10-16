@@ -101,17 +101,27 @@ class FormDialog(ctk.CTkToplevel):
         # Bind do evento de fechamento
         self.protocol("WM_DELETE_WINDOW", self.safe_destroy)
         
-        # Container principal
+        # Container principal com grid para melhor controle
         self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        # Scrollable frame para o conteúdo
-        self.content_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
-        self.content_frame.pack(fill="both", expand=True, pady=(0, 20))
+        # Configurar grid - linha 0 expande (conteúdo), linha 1 fixa (botões)
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_rowconfigure(1, weight=0)
+        self.main_frame.grid_columnconfigure(0, weight=1)
         
-        # Frame de botões
+        # Scrollable frame para o conteúdo - expande verticalmente
+        self.content_frame = ctk.CTkScrollableFrame(
+            self.main_frame, 
+            fg_color="transparent",
+            scrollbar_button_color=COLORS.get("primary", "#2196F3"),
+            scrollbar_button_hover_color=COLORS.get("primary_dark", "#1976D2")
+        )
+        self.content_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 20))
+        
+        # Frame de botões fixo na parte inferior - não expande
         self.buttons_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        self.buttons_frame.pack(fill="x")
+        self.buttons_frame.grid(row=1, column=0, sticky="ew")
     
     def safe_destroy(self):
         """Destrói o dialog de forma segura"""

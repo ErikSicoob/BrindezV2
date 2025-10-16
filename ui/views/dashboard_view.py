@@ -39,7 +39,7 @@ class DashboardView(ctk.CTkFrame):
         )
         
         self.total_products_card = self._create_stat_card(
-            self.cards_frame, "Produtos Cadastrados", "0", "🎁", COLORS["info"], 1
+            self.cards_frame, "Produtos Cadastrados", "0", "🎁", COLORS["accent_medium"], 1
         )
         
         self.total_value_card = self._create_stat_card(
@@ -51,7 +51,7 @@ class DashboardView(ctk.CTkFrame):
         )
         
         # Seção de categorias
-        categories_frame = ctk.CTkFrame(main_container, fg_color="white", corner_radius=10)
+        categories_frame = ctk.CTkFrame(main_container, fg_color=COLORS["card_bg"], corner_radius=10)
         categories_frame.pack(fill="both", expand=True)
         
         # Título
@@ -59,7 +59,7 @@ class DashboardView(ctk.CTkFrame):
             categories_frame,
             text="📊 Itens por Categoria",
             font=("Segoe UI", 18, "bold"),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         title_label.pack(padx=20, pady=(20, 10), anchor="w")
         
@@ -69,7 +69,7 @@ class DashboardView(ctk.CTkFrame):
     
     def _create_stat_card(self, parent, title, value, icon, color, column):
         """Cria um card de estatística"""
-        card = ctk.CTkFrame(parent, fg_color="white", corner_radius=10, height=120)
+        card = ctk.CTkFrame(parent, fg_color=COLORS["card_bg"], corner_radius=10, height=120)
         card.grid(row=0, column=column, padx=10, pady=10, sticky="nsew")
         
         # Ícone
@@ -110,12 +110,12 @@ class DashboardView(ctk.CTkFrame):
             row,
             text=category_name,
             font=("Segoe UI", 12),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         name_label.pack(side="left", padx=(0, 20))
         
         # Barra de progresso
-        progress_frame = ctk.CTkFrame(row, fg_color="#e0e0e0", height=25, corner_radius=5)
+        progress_frame = ctk.CTkFrame(row, fg_color=COLORS["border"], height=25, corner_radius=5)
         progress_frame.pack(side="left", fill="x", expand=True)
         
         if percentage > 0:

@@ -28,7 +28,7 @@ class ConfiguracoesView(ctk.CTkFrame):
             main_container,
             text="⚙️ Configurações do Sistema",
             font=("Segoe UI", 24, "bold"),
-            text_color=COLORS["dark"]
+            text_color=COLORS["card_text"]
         )
         title.pack(pady=(0, 20))
         
@@ -59,7 +59,7 @@ class ConfiguracoesView(ctk.CTkFrame):
         tab = self.tabview.tab("Gerais")
         
         # Card de configurações
-        card = ctk.CTkFrame(tab, fg_color="white", corner_radius=10)
+        card = ctk.CTkFrame(tab, fg_color=COLORS["card_bg"], corner_radius=10)
         card.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Caminho do banco

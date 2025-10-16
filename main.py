@@ -32,10 +32,12 @@ class App(ctk.CTk):
             self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
             info(f"Janela configurada: {WINDOW_WIDTH}x{WINDOW_HEIGHT}")
             
-            # Configurar tema
+            # Configurar tema customizado
+            import os
+            theme_path = os.path.join(os.path.dirname(__file__), "config", "custom_theme.json")
             ctk.set_appearance_mode("light")
-            ctk.set_default_color_theme("blue")
-            info("Tema configurado: light mode")
+            ctk.set_default_color_theme(theme_path)
+            info(f"Tema customizado aplicado: {theme_path}")
             
             # Autenticar usuário
             info("Autenticando usuário...")

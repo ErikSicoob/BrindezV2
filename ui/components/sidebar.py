@@ -34,11 +34,11 @@ class Sidebar(ctk.CTkFrame):
             title_frame,
             text="🎁 Gestão de\nBrindes",
             font=("Segoe UI", 20, "bold"),
-            text_color="white"
+            text_color=COLORS["sidebar_text"]
         )
         title.pack()
         
-        # Separador
+        # Separador com cor primária (turquesa)
         separator = ctk.CTkFrame(self, height=2, fg_color=COLORS["primary"])
         separator.pack(fill="x", padx=20, pady=(0, 20))
         
@@ -70,7 +70,7 @@ class Sidebar(ctk.CTkFrame):
             corner_radius=8,
             fg_color="transparent",
             hover_color=COLORS["sidebar_hover"],
-            text_color="white",
+            text_color=COLORS["sidebar_text"],
             anchor="w",
             command=lambda t=text: self._on_button_click(t)
         )
@@ -81,7 +81,8 @@ class Sidebar(ctk.CTkFrame):
         """Cria informações do usuário"""
         from utils.auth import auth_manager
         
-        user_frame = ctk.CTkFrame(self, fg_color=COLORS["sidebar_hover"], corner_radius=8)
+        # Frame com fundo turquesa (primary)
+        user_frame = ctk.CTkFrame(self, fg_color=COLORS["primary"], corner_radius=8)
         user_frame.pack(fill="x", padx=15, pady=20)
         
         user = auth_manager.current_user
@@ -90,7 +91,7 @@ class Sidebar(ctk.CTkFrame):
                 user_frame,
                 text=f"👤 {user['name']}",
                 font=("Segoe UI", 12, "bold"),
-                text_color="white"
+                text_color=COLORS["white"]
             )
             name_label.pack(padx=15, pady=(10, 5), anchor="w")
             
@@ -98,7 +99,7 @@ class Sidebar(ctk.CTkFrame):
                 user_frame,
                 text=f"📍 {user['branch_name']}",
                 font=("Segoe UI", 10),
-                text_color="#aaaaaa"
+                text_color=COLORS["white"]
             )
             branch_label.pack(padx=15, pady=(0, 5), anchor="w")
             
@@ -106,7 +107,7 @@ class Sidebar(ctk.CTkFrame):
                 user_frame,
                 text=f"🔑 {user['profile']}",
                 font=("Segoe UI", 10),
-                text_color="#aaaaaa"
+                text_color=COLORS["white"]
             )
             profile_label.pack(padx=15, pady=(0, 10), anchor="w")
     
@@ -125,7 +126,7 @@ class Sidebar(ctk.CTkFrame):
             self.active_button.configure(fg_color="transparent")
         
         if menu_name in self.buttons:
-            self.buttons[menu_name].configure(fg_color=COLORS["primary"])
+            self.buttons[menu_name].configure(fg_color=COLORS["sidebar_active"])
             self.active_button = self.buttons[menu_name]
     
     def set_active_menu(self, menu_name):

@@ -61,7 +61,7 @@ class UsuariosConfig(ctk.CTkFrame):
         new_btn.pack(pady=(0, 20))
         
         # Lista
-        self.list_frame = ctk.CTkScrollableFrame(self, fg_color="white", corner_radius=10)
+        self.list_frame = ctk.CTkScrollableFrame(self, fg_color=COLORS["card_bg"], corner_radius=10)
         self.list_frame.pack(fill="both", expand=True)
     
     def load_data(self):
